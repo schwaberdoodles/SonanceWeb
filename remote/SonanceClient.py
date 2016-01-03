@@ -5,6 +5,7 @@
 #
 
 import socket
+import json
 
 class SonanceSource:
     TUNER = 1
@@ -18,6 +19,7 @@ class SonanceZone:
     MASTER_BEDROOM = 4
     AVAS_BEDROOM = 5
     OUTDOOR = 6
+
 
 class SonanceVolume:
     LOW = 10
@@ -37,8 +39,6 @@ class SonanceFunction:
 
 class SonanceMessage:
     TERMINATOR = '\r\n'
-    TYPE_COMMAND = 1
-    TYPE_QUERY = 2
 
     def __init__(self):
         self.body = ""
@@ -68,6 +68,7 @@ class SonanceResponse:
     SONANCE_UNKNOWN = -1
     SONANCE_ERROR = 0
     SONANCE_OK = 1
+    SONANCE_BAD_MESSAGE = 2;
 
     def __init__(self):
         self.rsp_status = SonanceResponse.SONANCE_UNKNOWN
@@ -83,37 +84,41 @@ class SonanceResponse:
         else:
             return "ERR"
 
-    def append(self, message):
-        self.msg.append(message)
+class SonanceZoneState:
 
-    def set_code(self, code):
-        self.rsp_code = code
+    def __init(self,zone,source,power,volume):
+        self.zone = zone
+        self.source = source
+        self.power = power
+        self.volume = volume
 
-    def status(self):
-        if self.msg.body.endswith('+OK',0,-2):
-            self.rsp_status = SonanceResponse.SONANCE_OK
-        elif last_msg.message.endswith('+ERR',0,-2):
-            self.rsp_status = SonanceResponse.SONANCE_ERROR
-        return SonanceResponse.SONANCE_UNKNOWN
+    def __str__(self):
+        return json.dumps({ 'zone': self.zone, 'source': self.source, 'power': self.power, 'volume': self.volume})
 
 class SonanceCommandResponse(SonanceResponse):
 
-    def __init__(self, message):
-        self.message = message
-        self.status()
+    def __init__(self, cmd, status):
+        self.cmd = cmd
+        self.status = status
+
+    def __str__(self):
+        return json.dumps({'cmd': self.cmd, 'status': self.status})
+
 
 class SonanceQueryResponse(SonanceResponse):
 
     def __init__(self, message):
         self.message = message
         # like command response but sonance query responses don't contain status codes
-        self.rsp_status = SonanceResponse.SONANCE_OK
-        self.rsp_code = 0
+        self.status = SonanceResponse.SONANCE_OK
         self.qtype = ""
         self.zone = 0
         self.value = 0
-        self.state = 0
         self.parse()
+        #print "query_response->%s<-" % message
+
+    def __str__(self):
+        return json.dumps({'qtype': self.qtype, 'status': self._status, 'zone': self.zone, 'value': self.value})
 
     def set_zone(self, zone):
         self.zone = zone
@@ -121,25 +126,28 @@ class SonanceQueryResponse(SonanceResponse):
     def set_value(self, value):
         self.value = value
 
+    def get_status(self):
+        return self.status
+
+    def value(self):
+        return self.value
+
     def parse(self):
-        if self.message.length == 3:
-            self.qtype = self.message.message[1]
-            self.zone = self.message.message[2]
-            self.value = self.message.message[3]
-        elif self.message.length == 5:
-            self.state = self.message.message[3:5]
+        if self.message[0] != '+':
+            self._status = SONANCE_BAD_MESSAGE
+        elif len(self.message) >= 3:
+            self.qtype = self.message[1]
+            self.zone = self.message[2]
+            self.value = self.message[3]
+            if len(self.message) >= 4:
+                self.value = self.message[3:5]
         else:
             # bad response message
-            self.rsp_status = SonanceResponse.SONANCE_ERROR
-
+            self.status = SonanceResponse.SONANCE_ERROR
 
 class SonanceRemote:
     SOCK_RECV_BUFFER_SIZE = 32
     SOCK_TIMEOUT = 1
-
-    host = "172.16.1.80"
-    port = 7777
-    _s = socket
 
     def __init__(self):
         self._s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -151,44 +159,43 @@ class SonanceRemote:
     def connect(self,host="172.16.1.80",port=7777):
         try:
             self._s = socket.create_connection((host,port))
+            print "Connected to %s:%s" % (host, port)
             return True
         except socket.error, v:
-            errorcode=v[0]
-            if errorcode==errno.ECONNREFUSED:
-                print "Connection Refused"
+            print "Connection Error..."
             return False
-
-    # Send a command message and receive the response
-    def send_message(self, msg, msg_type):
-        print "send_message(%s)" % msg
-        self._s.sendall("%s%s" % (msg, SonanceMessage.TERMINATOR))
-        msgs = []
-        msgs.append(SonanceMessage())
-        while True:
-            buff = self._s.recv(SonanceRemote.SOCK_RECV_BUFFER_SIZE)
-            if not buff:
-                break
-            else:
-                msgs[-1].append(buff)
-                if msg_type == SonanceMessage.TYPE_COMMAND:
-                    if msgs[-1].status() != SonanceResponse.SONANCE_UNKNOWN:
-                        return msgs
-                    else:
-                        msgs.append(SonanceMessage)
-                elif msg_type == SonanceMessage.TYPE_QUERY:
-                    if msgs[-1].received():
-                        return msgs
-
-    def send_command(self, cmd):
-        #print "send_command(%s) = " % cmd
-        return SonanceCommandResponse(self.send_message(cmd,SonanceMessage.TYPE_COMMAND).pop())
-
-    def send_query(self, cmd):
-        #print "send_query(%s) = " % cmd
-        return SonanceQueryResponse(self.send_message(cmd,SonanceMessage.TYPE_QUERY).pop())
 
     def disconnect(self):
         self._s.close()
+
+    def send_command(self, cmd):
+        #print "send_command(%s)" % cmd
+        self._s.sendall("%s%s" % (cmd, SonanceMessage.TERMINATOR))
+        msg = ""
+        while True:
+            pkt = self._s.recv(SonanceRemote.SOCK_RECV_BUFFER_SIZE)
+            if not pkt:
+                break
+            else:
+                msg += pkt
+                if msg.endswith('+OK',0,-2):
+                    lines = msg.splitlines()
+                    return SonanceCommandResponse(lines[0],SonanceResponse.SONANCE_OK)
+                elif msg.endswith('+ERR',0,-2):
+                    return SonanceCommandResponse(lines[0],SonanceResponse.SONANCE_ERROR)
+
+    def send_query(self, cmd):
+        #print "send_query(%s) = " % cmd
+        self._s.sendall("%s%s" % (cmd, SonanceMessage.TERMINATOR))
+        msg = ""
+        while True:
+            pkt = self._s.recv(SonanceRemote.SOCK_RECV_BUFFER_SIZE)
+            if not pkt:
+                break
+            else:
+                msg += pkt
+                if msg.endswith(SonanceMessage.TERMINATOR):
+                    return SonanceQueryResponse(msg.strip())
 
 class SonanceCommand:
 
@@ -225,24 +232,24 @@ class SonanceQuery():
         self.r = _remote
 
     def zonePower(self,zone):
-        rsp = self.r.send_query(":%s%d?" % (SonanceFunction.POWER, zone))
-        print "queryPower (%s) = %s" % (rsp.zone, rsp.state)
+        return self.r.send_query(":%s%d?" % (SonanceFunction.POWER, zone))
 
     def source(self,zone):
-        rsp = self.r.send_query(":%s%d?" % (SonanceFunction.SOURCE, zone))
-        print "querySource (%s) = %s" % (rsp.zone, rsp.state)
+        return self.r.send_query(":%s%d?" % (SonanceFunction.SOURCE, zone))
 
     def volume(self,zone):
-        rsp = self.r.send_query(":%s%d?" % (SonanceFunction.VOLUME, zone))
-        print "queryVolume (%s) = %s" % (rsp.zone, rsp.state)
+        return self.r.send_query(":%s%d?" % (SonanceFunction.VOLUME, zone))
 
     def mute(self,zone):
-        rsp = self.r.send_query(":M%d?" % zone)
-        print "queryMute(%s) = %s" % (rsp.zone, rsp.state)
+        return self.r.send_query(":M%d?" % zone)
 
-    def anyZonesOn(self):
-        # broken
-        rsp = self.r.send_query(":Z?")
-        print "anyZonesOn() = %s" % rsp
+    def zoneState(self,zone):
+        state = SonanceZoneState()
+        state.zone = zone
+        state.power = self.zonePower(zone).value
+        state.source = self.source(zone).value
+        state.volume = self.volume(zone).value
+        return state
 
-
+    def zoneStates(self):
+        foreach
