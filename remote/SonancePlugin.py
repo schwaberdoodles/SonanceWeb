@@ -9,9 +9,7 @@ class SonanceQueryPlugin(object):
     name = 'sonance'
     api = 2
 
-    def __init__(self, host="172.16.1.80", port=7777, keyword='sonance_client'):
-        self.host = host
-        self.port = port
+    def __init__(self, keyword='sonance_client'):
         self.keyword = keyword
         self.r = SonanceRemote()
 

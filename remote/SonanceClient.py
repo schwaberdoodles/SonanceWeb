@@ -6,6 +6,7 @@
 
 import socket
 import json
+import os
 
 class SonanceSource:
     TUNER = 1
@@ -156,7 +157,7 @@ class SonanceRemote:
     def __del__(self):
         self.disconnect()
 
-    def connect(self,host="172.16.1.80",port=7777):
+    def connect(self, host=os.getenv('SONANCE_SERVER_HOSTNAME', "127.0.0.1"), port=os.getenv('SONANCE_SERVER_PORT', "7777")):
         try:
             self._s = socket.create_connection((host,port))
             print "Connected to %s:%s" % (host, port)
