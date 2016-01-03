@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 from bottle import route, run, template, install, response
 from bottle import static_file
 from SonanceClient import *
@@ -60,4 +61,4 @@ def zone_volume(zone_id,volume_level):
     sonance_remote.disconnect()
     return res.__str__()
 
-run(host="0.0.0.0",port=8080,debug=True)
+run(host="0.0.0.0",port=8087)
