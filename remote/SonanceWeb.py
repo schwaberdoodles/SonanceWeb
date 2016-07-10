@@ -5,9 +5,13 @@ from SonanceClient import *
 
 sonance_remote = SonanceRemote()
 
-@route('/',method='GET')
+@route('/')
 def index():
-    return static_file(filename="index.html", root="app/")
+    return get_static("index.html")
+
+@route('/remote/app/static/<filename>',method='GET')
+def get_static(filename):
+    return static_file(filename, root="remote/app/static")
 
 @route('/sonance/zones',method='GET')
 def zones():
