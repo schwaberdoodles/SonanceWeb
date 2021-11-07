@@ -16,3 +16,5 @@ Provides an HTML5 interface to the Sonance DAB1 (http://www.soundandvision.com/c
 ##Notes
 
 * Communication with the sonance device is accomplished using the pyserial tcp_serial_redirect capability. SonanceWeb uses a TCP socket to communicate with pyserial.
+
+* No longer maintained
