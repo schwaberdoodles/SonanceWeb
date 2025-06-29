@@ -3,8 +3,8 @@ from SonanceClient import SonanceRemote, SonanceQuery
 import inspect
 
 class SonanceQueryPlugin(object):
-    ''' This plugin passes an SonanceClient handle to route callbacks. You can override the database
-    settings on a per-route basis. '''
+    '''Injects a ``SonanceQuery`` instance into route callbacks so handlers can
+    communicate with the Sonance DAB1.'''
 
     name = 'sonance'
     api = 2

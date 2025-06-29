@@ -4,8 +4,6 @@
 [Sonance DAB1 distributed audio system](http://www.soundandvision.com/content/sonance-dab1-distributed-audio-system).  
 Control your home’s audio zones with an intuitive HTML5 interface — right from any browser.
 
----
-
 ## 🚀 Project Highlights
 
 - Modern Python 3 codebase (originally Python 2.7)

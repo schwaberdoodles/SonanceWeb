@@ -186,8 +186,10 @@ class SonanceRemote:
                 msg += pkt
                 if msg.endswith('+OK',0,-2) or msg.endswith('+ERR',0,-2):
                     lines = msg.splitlines()
-                    status = SonanceResponse.SONANCE_OK if msg.endswith('+OK',0,-2) else SonanceResponse.SONANCE_ERROR
-                    return SonanceCommandResponse(lines[0], status)
+                    return SonanceCommandResponse(lines[0],SonanceResponse.SONANCE_OK)
+                elif msg.endswith('+ERR',0,-2):
+                    lines = msg.splitlines()
+                    return SonanceCommandResponse(lines[0],SonanceResponse.SONANCE_ERROR)
 
     def send_query(self, cmd):
         #print "send_query(%s) = " % cmd
