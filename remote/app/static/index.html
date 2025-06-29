@@ -1,163 +1,114 @@
 <!DOCTYPE html>
 <html>
-
-  <head>
-    <script data-require="jquery@2.1.3" data-semver="2.1.3" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
-    <script data-require="knockout@3.3.0" data-semver="3.3.0" src="http://cdnjs.cloudflare.com/ajax/libs/knockout/3.3.0/knockout-min.js"></script>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sonance Remote</title>
     <style>
-        body { width: 320px }
-        .control-panel { background: border-box; background-color: white; }
-        .zone { }
+        body {
+            max-width: 480px;
+            margin: 0 auto;
+            font-family: Arial, sans-serif;
+            padding: 0 10px;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            text-align: center;
+            padding: 15px 0;
+            font-size: 1.5em;
+        }
+        .zone {
+            margin: 20px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 8px;
+        }
+        .zone h2 {
+            margin: 0 0 10px 0;
+            font-size: 1.3em;
+            text-align: center;
+        }
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .controls button {
+            font-size: 1.5em;
+            width: 30%;
+            padding: 10px;
+        }
+        .controls input[type=range] {
+            width: 40%;
+        }
     </style>
-  </head>
-
-  <body>
-
-    <header>
-        Sonance
-    </header>
-
-        <nav>
-        <ul>
-            <li><a href="#VolumeTab" id="VolumeTab">Volume</a></li>
-            <li><a href="#SourceTab" id="SourceTab">Source</a></li>
-            <li><a href="#PowerTab" id="PowerTab">Power</a></li>
-            <!-- TBD -->
-            <!-- <li>EQ</li> -->
-            <!-- <li>Tuner</li> -->
-        </ul>
-            <script language="javascript">
-                $( "#VolumeTab" ).click(function() {
-                    $('#volume-controls').show();
-                    $('#power-controls').hide();
-                    $('#source-controls').hide();
-                });
-                $( "#SourceTab" ).click(function() {
-                    $('#volume-controls').hide();
-                    $('#power-controls').hide();
-                    $('#source-controls').show();
-                });
-                $( "#PowerTab" ).click(function() {
-                    $('#volume-controls').hide();
-                    $('#power-controls').show();
-                    $('#source-controls').hide();
-                });
-
-            </script>
-
-        </nav>
-
-    <zones>
-        <!-- Volume Controls -->
-        <div class="control-panel" id="volume-controls">
-            <div class="zone" id="zone1" control="volume">
-                Zone 1 <input name="zone1.volume" type="range" min="0" max="40" value="10"/>
-            </div>
-            <p>
-            <div class="zone" id="zone2" control="volume">
-                Zone 2
-                <input name="zone2.volume" type="range" min="0" max="40" value="10"/>
-            </div>
-            <p>
-            <div class="zone" id="zone3" control="volume">
-                Zone 3
-                <input name="zone3.volume" type="range" min="0" max="40" value="10"/>
-            </div>
+</head>
+<body>
+<header>Sonance</header>
+<div id="zones">
+    <!-- Repeat for 6 zones -->
+    <div class="zone">
+        <h2>Zone 1</h2>
+        <div class="controls">
+            <button class="vol-down" data-zone="1">-</button>
+            <input type="range" min="0" max="40" value="20" data-zone="1" />
+            <button class="vol-up" data-zone="1">+</button>
         </div>
-
-        <!-- Source Controls -->
-        <div class="control-panel" id="source-controls">
-            <p>
-            <div class="zone" id="zone1" control="source">
-                Zone 1
-                <select name="zone1.source" value="2">
-                    <option value="1">Tuner</option>
-                    <option value="2">Airport</option>
-                    <option value="3">Movie</option>
-                    <option value="4">N/A</option>
-                </select>
-            </div>
-            </p>
-            <p>
-            <div class="zone" id="zone2" control="source">
-                Zone 2
-                <select name="zone2.source" value="2">
-                    <option value="1">Tuner</option>
-                    <option value="2">Airport</option>
-                    <option value="3">Movie</option>
-                    <option value="4">N/A</option>
-                </select>
-            </div>
-            </p>
-            <p>
-            <div class="zone" id="zone3" control="source">
-                Zone 3
-                <select name="zone3.source" value="2">
-                    <option value="1">Tuner</option>
-                    <option value="2">Airport</option>
-                    <option value="3">Movie</option>
-                    <option value="4">N/A</option>
-                </select>
-            </div>
-            </p>
-        </div>
-
-
-        <!-- Power Controls -->
-        <div class="control-panel" id="power-controls">
-            <p>
-            <div class="zone" id="zone1" control="power">
-                Zone 1
-                <input name="zone1.power" type="range" min="0" max="1" value="1"/>
-            </div>
-            </p>
-            <p>
-            <div class="zone" id="zone2" control="power">
-                Zone 2
-                <input name="zone2.power" type="range" min="0" max="1" value="1"/>
-            </div>
-            </p>
-            <p>
-            <div class="zone" id="zone3" control="power">
-                Zone 3
-                <input name="zone3.power" type="range" min="0" max="1" value="1"/>
-            </div>
-            </p>
-        </div>
-    </zones>
-
-    <div class="toc">
     </div>
-
-    <!-- Zones -->
-    <div class="control-panel" id="power-controls" data-bind="foreach: { data: zones, as: 'z'}>
-        <p>
-        <div class="zone" control="power">
-            <span data-bind="text: z.zone"></span>
-            <input name="zone1.power" type="range" min="0" max="1" value="1" data-bind="value: z.volume"/>
+    <div class="zone">
+        <h2>Zone 2</h2>
+        <div class="controls">
+            <button class="vol-down" data-zone="2">-</button>
+            <input type="range" min="0" max="40" value="20" data-zone="2" />
+            <button class="vol-up" data-zone="2">+</button>
         </div>
-        </p>
     </div>
-
-    <script language="javascript">
-              
-      function AppViewModel() {
-          var self = this;
-          this.zones = [{"volume": "32", "source": "2", "power": "1", "zone": 1},
-              {"volume": "10", "source": "2", "power": "0", "zone": 3},
-              {"volume": "20", "source": "1", "power": "0", "zone": 2},
-              {"volume": "20", "source": "2", "power": "0", "zone": 4},
-              {"volume": "10", "source": "2", "power": "0", "zone": 5},
-              {"volume": "20", "source": "1", "power": "0", "zone": 6}
-              ];
-      }
-
-      // Activates knockout.js
-      ko.applyBindings(new AppViewModel());              
-
-    </script>
-    
-    
-  </body>
-
+    <div class="zone">
+        <h2>Zone 3</h2>
+        <div class="controls">
+            <button class="vol-down" data-zone="3">-</button>
+            <input type="range" min="0" max="40" value="20" data-zone="3" />
+            <button class="vol-up" data-zone="3">+</button>
+        </div>
+    </div>
+    <div class="zone">
+        <h2>Zone 4</h2>
+        <div class="controls">
+            <button class="vol-down" data-zone="4">-</button>
+            <input type="range" min="0" max="40" value="20" data-zone="4" />
+            <button class="vol-up" data-zone="4">+</button>
+        </div>
+    </div>
+    <div class="zone">
+        <h2>Zone 5</h2>
+        <div class="controls">
+            <button class="vol-down" data-zone="5">-</button>
+            <input type="range" min="0" max="40" value="20" data-zone="5" />
+            <button class="vol-up" data-zone="5">+</button>
+        </div>
+    </div>
+    <div class="zone">
+        <h2>Zone 6</h2>
+        <div class="controls">
+            <button class="vol-down" data-zone="6">-</button>
+            <input type="range" min="0" max="40" value="20" data-zone="6" />
+            <button class="vol-up" data-zone="6">+</button>
+        </div>
+    </div>
+</div>
+<script>
+    document.querySelectorAll('.vol-up').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var range = this.previousElementSibling;
+            range.value = Math.min(parseInt(range.max), parseInt(range.value)+1);
+        });
+    });
+    document.querySelectorAll('.vol-down').forEach(function(btn){
+        btn.addEventListener('click', function(){
+            var range = this.nextElementSibling;
+            range.value = Math.max(parseInt(range.min), parseInt(range.value)-1);
+        });
+    });
+</script>
+</body>
 </html>
