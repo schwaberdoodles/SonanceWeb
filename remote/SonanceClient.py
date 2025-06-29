@@ -8,6 +8,8 @@ import socket
 import json
 import os
 
+# NOTE: Originally written for Python 2.7 and updated for Python 3 compatibility.
+
 class SonanceSource:
     TUNER = 1
     AIRPORT = 2
@@ -49,7 +51,8 @@ class SonanceMessage:
 
     def received(self):
         if self.body.endswith(SonanceMessage.TERMINATOR):
-            print "message received = %s" % self.body
+            # Python 3 print function
+            print("message received = %s" % self.body)
             return True
         return False
 
@@ -160,10 +163,12 @@ class SonanceRemote:
     def connect(self, host=os.getenv('SONANCE_SERVER_HOSTNAME', "127.0.0.1"), port=os.getenv('SONANCE_SERVER_PORT', "7777")):
         try:
             self._s = socket.create_connection((host,port))
-            print "Connected to %s:%s" % (host, port)
+            # Connection successful
+            print("Connected to %s:%s" % (host, port))
             return True
-        except socket.error, v:
-            print "Connection Error..."
+        except socket.error as e:
+            # Socket error from Python 2 syntax updated for Python 3
+            print("Connection Error...")
             return False
 
     def disconnect(self):
