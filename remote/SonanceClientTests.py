@@ -65,11 +65,12 @@ class TestQueries(unittest.TestCase):
         self.assertTrue(self.query.mute(SonanceZone.OFFICE).get_status())
 
     def test_zone_state(self):
-        print self.query.zoneState(SonanceZone.OFFICE)
-        print self.query.zoneState(SonanceZone.LIVING_ROOM)
-        print self.query.zoneState(SonanceZone.KITCHEN)
-        print self.query.zoneState(SonanceZone.MASTER_BEDROOM)
-        print self.query.zoneState(SonanceZone.AVAS_BEDROOM)
-        print self.query.zoneState(SonanceZone.OUTDOOR)
+        # Debug prints updated for Python 3
+        print(self.query.zoneState(SonanceZone.OFFICE))
+        print(self.query.zoneState(SonanceZone.LIVING_ROOM))
+        print(self.query.zoneState(SonanceZone.KITCHEN))
+        print(self.query.zoneState(SonanceZone.MASTER_BEDROOM))
+        print(self.query.zoneState(SonanceZone.AVAS_BEDROOM))
+        print(self.query.zoneState(SonanceZone.OUTDOOR))
 
 

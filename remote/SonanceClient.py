@@ -8,6 +8,8 @@ import socket
 import json
 import os
 
+# NOTE: Originally written for Python 2.7 and updated for Python 3 compatibility.
+
 class SonanceSource:
     TUNER = 1
     AIRPORT = 2
@@ -49,7 +51,8 @@ class SonanceMessage:
 
     def received(self):
         if self.body.endswith(SonanceMessage.TERMINATOR):
-            print "message received = %s" % self.body
+            # Python 3 print function
+            print("message received = %s" % self.body)
             return True
         return False
 
@@ -87,7 +90,7 @@ class SonanceResponse:
 
 class SonanceZoneState:
 
-    def __init(self,zone,source,power,volume):
+    def __init__(self, zone=None, source=None, power=None, volume=None):
         self.zone = zone
         self.source = source
         self.power = power
@@ -119,7 +122,7 @@ class SonanceQueryResponse(SonanceResponse):
         #print "query_response->%s<-" % message
 
     def __str__(self):
-        return json.dumps({'qtype': self.qtype, 'status': self._status, 'zone': self.zone, 'value': self.value})
+        return json.dumps({'qtype': self.qtype, 'status': self.status, 'zone': self.zone, 'value': self.value})
 
     def set_zone(self, zone):
         self.zone = zone
@@ -130,12 +133,12 @@ class SonanceQueryResponse(SonanceResponse):
     def get_status(self):
         return self.status
 
-    def value(self):
+    def get_value(self):
         return self.value
 
     def parse(self):
         if self.message[0] != '+':
-            self._status = SONANCE_BAD_MESSAGE
+            self.status = SonanceResponse.SONANCE_BAD_MESSAGE
         elif len(self.message) >= 3:
             self.qtype = self.message[1]
             self.zone = self.message[2]
@@ -159,11 +162,13 @@ class SonanceRemote:
 
     def connect(self, host=os.getenv('SONANCE_SERVER_HOSTNAME', "127.0.0.1"), port=os.getenv('SONANCE_SERVER_PORT', "7777")):
         try:
-            self._s = socket.create_connection((host,port))
-            print "Connected to %s:%s" % (host, port)
+            self._s = socket.create_connection((host, int(port)))
+            # Connection successful
+            print("Connected to %s:%s" % (host, port))
             return True
-        except socket.error, v:
-            print "Connection Error..."
+        except socket.error as e:
+            # Socket error from Python 2 syntax updated for Python 3
+            print("Connection Error...")
             return False
 
     def disconnect(self):
@@ -179,7 +184,7 @@ class SonanceRemote:
                 break
             else:
                 msg += pkt
-                if msg.endswith('+OK',0,-2):
+                if msg.endswith('+OK',0,-2) or msg.endswith('+ERR',0,-2):
                     lines = msg.splitlines()
                     return SonanceCommandResponse(lines[0],SonanceResponse.SONANCE_OK)
                 elif msg.endswith('+ERR',0,-2):
@@ -254,4 +259,7 @@ class SonanceQuery():
         return state
 
     def zoneStates(self):
-        foreach
+        states = []
+        for zone_id in range(1, 7):
+            states.append(self.zoneState(zone_id))
+        return states
