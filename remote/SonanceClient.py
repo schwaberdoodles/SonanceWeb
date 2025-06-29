@@ -183,6 +183,7 @@ class SonanceRemote:
                     lines = msg.splitlines()
                     return SonanceCommandResponse(lines[0],SonanceResponse.SONANCE_OK)
                 elif msg.endswith('+ERR',0,-2):
+                    lines = msg.splitlines()
                     return SonanceCommandResponse(lines[0],SonanceResponse.SONANCE_ERROR)
 
     def send_query(self, cmd):

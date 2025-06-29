@@ -27,7 +27,8 @@ class TestCommands(unittest.TestCase):
 
     def test_volume(self):
         c = SonanceCommand(self.r)
-        self.assertTrue(c.muteoff(SonanceZone.OFFICE).status, SonanceCommandResponse.SONANCE_OK)
+        result = c.volume(SonanceZone.OFFICE, SonanceVolume.NORMAL)
+        self.assertEqual(result.status, SonanceResponse.SONANCE_OK)
 
     def test_muteon(self):
         c = SonanceCommand(self.r)

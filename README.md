@@ -2,7 +2,7 @@
 
 Provides an HTML5 interface to the Sonance DAB1 (http://www.soundandvision.com/content/sonance-dab1-distributed-audio-system)
 
-* Assumes you have a raspberryip, or something running python 2.7, attached via RS232 serial null modem cable to a Sonance DAB1.
+* Assumes you have a raspberry pi, or something running python 2.7, attached via RS232 serial null modem cable to a Sonance DAB1.
 
 * Uses the sonance serial port and serial protocol to control the DAB1
 
