@@ -51,13 +51,6 @@ def zone_source(zone_id,source_id):
     sonance_remote.disconnect()
     return res.__str__()
 
-@route('/sonance/zones/<zone_id>/source/<source_id>',method='GET')
-def zone_source(zone_id,source_id):
-    sonance_remote.connect()
-    res = SonanceCommand(sonance_remote).source(int(zone_id),int(source_id))
-    sonance_remote.disconnect()
-    return res.__str__()
-
 @route('/sonance/zones/<zone_id>/volume/<volume_level>',method='GET')
 def zone_volume(zone_id,volume_level):
     sonance_remote.connect()
